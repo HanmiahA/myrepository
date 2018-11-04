@@ -1,0 +1,18 @@
+load("~/Springboard Data Science/My Git Repository/Unit 2-3 Extra Practice Problem.Rproj.RData")
+my_vec <- c(5, 7, 10, 15, 17)
+double_vec <- my_vec * 2
+random <- rnorm(5)
+random_10 <- random + 10
+my_names <- c("Oliver", "Felicity", "William", "Arrow", "Thea")
+data_frame <- data.frame(my_vec, double_vec, random, random_10, my_names)
+arrange(data_frame, my_names)
+library("dplyr")
+library("tidyr")
+arrange(data_frame, my_names)
+data_frame <- arrange(data_frame, my_names)
+class(my_names)
+gather(data_frame, "variable", "value", 1:4)
+data_frame2 <- gather(data_frame, "variable", "value", 1:4)
+data_frame2 <- arrange(data_frame2, my_names)
+data_frame2
+savehistory("~/Springboard Data Science/Unit 2-3 Extra Practice Problem/Unit 2-3 Extra Practice Problem.Rproj")
