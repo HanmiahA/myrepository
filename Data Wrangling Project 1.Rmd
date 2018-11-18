@@ -1,0 +1,56 @@
+---
+title: "Data Wrangling Exercise 1"
+author: "Ankita Hanmiah"
+date: "November 15, 2018"
+output:
+  word_document: default
+  html_document: default
+---
+
+## Load Data in RStudio and into Data Frame
+```
+library("readr")
+library("dplyr")
+library("tidyr")
+refine_original <- read_csv("refine_original.csv")
+df_refine <- data.frame(refine_original)
+```
+## Clean Up Brand Names
+```
+df_refine$company <- tolower(df_refine$company)
+df_refine <- arrange(df_refine, company)
+df_refine$company <- sub("ak.*", "akzo", df_refine$company)
+df_refine$company <- sub(".*ps", "philips", df_refine$company)
+df_refine$company <- sub("un.*", "unilever", df_refine$company)
+```
+## Separate Product Code and Number
+```
+df_refine <- separate(df_refine, Product.code...number, c("product_code", "product_number"), sep = "-")
+```
+## Add Product Categories
+```
+refine_p <- df_refine %>% filter(product_code == "p") %>% mutate(product_category = "Smartphone")
+refine_v <- df_refine %>% filter(product_code == "v") %>% mutate(product_category = "TV")
+refine_x <- df_refine %>% filter(product_code == "x") %>% mutate(product_category = "Laptop")
+refine_q <- df_refine %>% filter(product_code == "q") %>% mutate(product_category = "Tablet")
+df_refine <- bind_rows(refine_p, refine_v, refine_x, refine_q)
+```
+## Add Full Address For Geocoding
+```
+df_refine <- unite(df_refine, "full address", address, city, country, sep = ",")
+```
+## Create Dummy Variables
+```
+df_refine <- df_refine %>% mutate(company_akzo = (ifelse(company %in% "akzo", yes =1, no = 0)))
+df_refine <- df_refine %>% mutate(company_philips = (ifelse(company %in% "philips", yes = 1, no = 0))) 
+df_refine <- df_refine %>% mutate(company_unilever = (ifelse(company %in% "unilever", yes = 1, no = 0)))
+df_refine <- df_refine %>% mutate(company_van_houten = (ifelse(company %in% "van houten", yes = 1, no = 0)))
+df_refine <- df_refine %>% mutate(product_smartphone = (ifelse(product_category %in% "Laptop", yes = 1, no = 0)))
+df_refine <- df_refine %>% mutate(product_tv = (ifelse(product_category %in% "TV", yes = 1, no = 0)))
+df_refine <- df_refine %>% mutate(product_laptop = (ifelse(product_category %in% "Laptop", yes = 1, no = 0)))
+df_refine <- df_refine %>% mutate(product_tablet = (ifelse(product_category %in% "Tablet", yes = 1, no = 0)))
+```
+## Save Cleaned Data
+```
+refine_clean <- df_refine
+write.csv(refine_clean, file = "refine_clean.csv")
