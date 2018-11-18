@@ -1,0 +1,83 @@
+---
+title: "Data Wrangling Project 2"
+author: "Ankita Hanmiah"
+date: "November 17, 2018"
+output:
+  word_document: default
+  html_document: default
+---
+
+## Load Data into RStudio
+```
+library("readr")
+library("dplyr")
+library("tidyr")
+
+titanic_original <- read.csv("titanic_original.csv")
+View(titanic_original)
+```
+## Port of Embarkation
+# Replacing Empty Strings with NA
+```
+titanic_original$embarked <- na_if(titanic_original$embarked, "")
+```
+#Converting Embarked NAs with S
+```
+embarkedNA <- which(is.na(titanic_original$embarked) == TRUE)
+titanic_original$embarked[embarkedNA] <- "S"
+```
+## Age
+# 1) Calculating Mean of Age Column and Populating Missing Values
+```
+avg_age <- mean(titanic_original$age, na.rm = TRUE)
+ageNA <- which(is.na(titanic_original$age) == TRUE)
+titanic_original$age[ageNA] <- avg_age
+```
+# 2) Other Ways to Populate Missing Values
+a) Average females and males separately and assign based on gender of the passengers
+```
+female <- filter(titanic_original, sex %in% c("female"))
+female_avg <- mean(female$age, na.rm = TRUE)
+female_NA <- which(is.na(female$age) == TRUE)
+male <- filter(titanic_original, sex %in% c("male"))
+male_avg <- mane(male$age, na.rm = TRUE)
+male_NA <- which(is.na(male$age) == TRUE)
+titanic_original$age[female_NA] <- female_avg 
+titanic_oritinal$age[male_NA] <- male_avg
+```
+The ages average is around 24, the female average around 28, and the male around 30. There is not a significantly large difference between these numbers, and using an averaged number still does not accurately account for the ranges of ages that would have been seen otherwise.   
+
+b) Choose a sample of 264 random numbers between the minimum and maximum ages of passengers and assign those to the missing values
+```
+max(titanic_original$age)
+```
+maximum age comes out to 80
+
+```
+random_age <- sample(0:80, 256, replace = TRUE)
+titanic_original$age[ageNA] <- random_age
+```
+Randomising the values would account for the range of ages that might be seen but whether or not it is more accurate is debatable. Probably the most accurate way to fill the values would be to look into connections between the variables, between possible family members, use the details that have been given, and try to quantify that into a possible age category. 
+
+## Lifeboat 
+# Replace Missing Values with Dummy Value
+```
+boatMV <- na_if(titanic_original$boat, "")
+boatNA <- which(is.na(titanic_original$boat) == TRUE)
+titanic_original$boat[boatNA] <- "NA"
+```
+## Cabin
+# 1) Does it make sense to fill missing cabin numbers with a value?
+No, because the cabin numbers are a specific value that indicates the specific part of the ship the passenger was assigned to stay. There is no real accurate or even general way to postulate values to meaningfully placehold the missing values.
+
+# 2) What does a missing value here mean?
+A large number of the values are missing and this could indicate many things. It could indicate class/importance, as many of the cabin numbers for first class are available but scrolling through third class, the majority are missing. It could also possibly mean the person did not survive or was not accounted for, though looking through some examples, it shows that this does not really hold true.
+
+#Creating New Column for has_cabin_number
+```
+titanic_original <- titanic_original$cabin %>% mutate(has_cabin_number = (ifelse(!is.na(cabin), yes = 1, no = 0)))
+```
+## Save CSV file of Clean Data
+```
+write.csv(titanic_original, file = "titanic_clean.csv")
+```
